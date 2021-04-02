@@ -1,94 +1,155 @@
+/* eslint-disable no-template-curly-in-string */
 import "./AdminPage.Style.css"
-import { Table } from "antd"
-import { useState } from "react"
-const columns = [
+import {
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  DatePicker,
+  Select,
+  notification
+} from "antd"
+import { useDispatch } from "react-redux"
+import TableStudent from "./Components/TableStudent"
+import { addStudent } from "../../Redux/actions/student.Action"
+const arrFieldName = [
   {
-    title: "Name",
-    dataIndex: "name"
+    label: "name",
+    placeholder: "Nhập tên",
+    type: "input"
   },
   {
-    title: "Age",
-    dataIndex: "age"
+    label: "gender",
+    type: "select"
   },
   {
-    title: "Address",
-    dataIndex: "address"
+    label: "birthday",
+    type: "datetime"
+  },
+  {
+    label: "email",
+    placeholder: "Nhập email của bạn",
+    type: "input"
+  },
+  {
+    label: "phone",
+    placeholder: "Nhập số điện thoại",
+    type: "input"
+  },
+  {
+    label: "currentAddress",
+    placeholder: "Nhập Địa chỉ hiện tại",
+    type: "input"
+  },
+  {
+    label: "homeTown",
+    placeholder: "Nhập địa chỉ thường trú",
+    type: "input"
   }
 ]
-const data = [
-  {
-    key: "1",
-    name: "John Brown",
-    age: 32,
-    address: "New York No. 1 Lake Park"
-  },
-  {
-    key: "2",
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park"
-  },
-  {
-    key: "3",
-    name: "Joe Black",
-    age: 32,
-    address: "Sidney No. 1 Lake Park"
-  },
-  {
-    key: "4",
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park"
-  },
-  {
-    key: "5",
-    name: "Joe Black",
-    age: 32,
-    address: "Sidney No. 1 Lake Park"
-  },
-  {
-    key: "6",
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park"
-  },
-  {
-    key: "7",
-    name: "Joe Black",
-    age: 32,
-    address: "Sidney No. 1 Lake Park"
-  },
-  {
-    key: "8",
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park"
-  },
-  {
-    key: "9",
-    name: "Joe Black",
-    age: 32,
-    address: "Sidney No. 1 Lake Park"
-  },
-  {
-    key: "10",
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park"
-  },
-  {
-    key: "11",
-    name: "Joe Black",
-    age: 32,
-    address: "Sidney No. 1 Lake Park"
+
+const dateFormat = "YYYY/MM/DD"
+
+interface IFieldFrom {
+  name: string
+  gender: string
+  birthday: string
+  email: string
+  phone: string
+  currentAddress: string
+  homeTown: string
+}
+const { Option } = Select
+
+const openNotification = () => {
+  const args = {
+    message: "Notification Title",
+    description:
+      "I will never close automatically. This is a purposely very very long description that has many many characters and words.",
+    duration: 2
   }
-]
-const AdminPage = () => {
-  const [col, setCol] = useState<any>(columns)
-  const [d, setD] = useState<any>(data)
+  notification.open(args)
+}
+const renderControl = (Element: any) => {
+  if (Element.type === "input")
+    return <Input placeholder={Element.placeholder} />
+  else if (Element.type === "select")
+    return (
+      <Select
+        placeholder="Select a person"
+        optionFilterProp="children"
+        filterOption={(input, option: any) =>
+          option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+        }
+      >
+        <Option value="feMale">Nữ</Option>
+        <Option value="Male">Nam</Option>
+        <Option value="GT#">Khác</Option>
+      </Select>
+    )
   return (
-    <div className="wrap_Content_Admin">
-      <Table columns={col} dataSource={d} size="middle" />
+    <DatePicker
+      format={dateFormat}
+      style={{ width: "100%", textAlign: "center" }}
+    />
+  )
+}
+const AdminPage = () => {
+  const dispatch = useDispatch()
+
+  const [form] = Form.useForm()
+
+  const getFields = () => {
+    const arr: Array<any> = []
+    arrFieldName.forEach((v, i) => {
+      arr.push(
+        <Col span={24} key={i}>
+          <Form.Item
+            name={`${v.label}`}
+            label={`${v.label}`}
+            labelCol={{ span: 5 }}
+            labelAlign="left"
+            // rules={[
+            //   {
+            //     // required: true,
+            //     message: "Input something!"
+            //   }
+            // ]}
+          >
+            {renderControl(v)}
+          </Form.Item>
+        </Col>
+      )
+    })
+    return arr
+  }
+
+  const onFinish = (values: IFieldFrom) => {
+    console.log(values)
+    openNotification()
+    dispatch(addStudent(values))
+  }
+  return (
+    <div className="AdminPage">
+      <TableStudent />
+      <div className="wrap_Control container">
+        <h3>From Add Student</h3>
+        <Form
+          form={form}
+          name="advanced_search"
+          className="ant-advanced-search-form"
+          onFinish={onFinish}
+        >
+          <Row gutter={[16, 16]}>{getFields()}</Row>
+
+          <Form.Item className="btn">
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
     </div>
   )
 }
